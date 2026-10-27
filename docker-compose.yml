@@ -1,0 +1,68 @@
+services:
+  db:
+    image: postgres:16-alpine
+    command: postgres -c listen_addresses='*'
+    environment:
+      POSTGRES_DB: student_db
+      POSTGRES_USER: student_user
+      POSTGRES_PASSWORD: student_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U student_user -d student_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  student-service:
+    build:
+      context: .
+      dockerfile: services/student_service/Dockerfile
+    environment:
+      # Change "db:5432" to "host.docker.internal:5432"
+      DATABASE_URL: postgresql+psycopg://student_user:student_password@host.docker.internal:5432/student_db
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  course-service:
+    build:
+      context: .
+      dockerfile: services/course_service/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://student_user:student_password@host.docker.internal:5432/student_db
+    ports:
+      - "8002:8002"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  result-service:
+    build:
+      context: .
+      dockerfile: services/result_service/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://student_user:student_password@host.docker.internal:5432/student_db
+    ports:
+      - "8003:8003"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

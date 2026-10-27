@@ -1,4 +1,4 @@
-
+```yaml
 name: Build and Push Docker Images
 
 on:
@@ -18,13 +18,13 @@ jobs:
       matrix:
         include:
           - service: student-service
-            context: services/student_service
+            dockerfile: services/student_service/Dockerfile
 
           - service: course-service
-            context: services/course_service
+            dockerfile: services/course_service/Dockerfile
 
           - service: result-service
-            context: services/result_service
+            dockerfile: services/result_service/Dockerfile
 
     steps:
       - name: Checkout repository
@@ -42,9 +42,10 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.context }}
-          file: Dockerfile
+          context: .
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
+```
