@@ -1,4 +1,3 @@
-```yaml
 name: Build and Push Docker Images
 
 on:
@@ -19,10 +18,8 @@ jobs:
         include:
           - service: student-service
             dockerfile: services/student_service/Dockerfile
-
           - service: course-service
             dockerfile: services/course_service/Dockerfile
-
           - service: result-service
             dockerfile: services/result_service/Dockerfile
 
@@ -48,4 +45,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
-```
