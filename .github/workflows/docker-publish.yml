@@ -18,13 +18,13 @@ jobs:
       matrix:
         include:
           - service: student-service
-            dockerfile: services/student_service/Dockerfile
+            context: services/student_service
 
           - service: course-service
-            dockerfile: services/course_service/Dockerfile
+            context: services/course_service
 
           - service: result-service
-            dockerfile: services/result_service/Dockerfile
+            context: services/result_service
 
     steps:
       - name: Checkout repository
@@ -42,8 +42,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.context }}
+          file: Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
